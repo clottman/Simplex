@@ -355,7 +355,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             {
                 numArtificial = 0;  
             }
-
+              
             return coefficients;
         }
 
