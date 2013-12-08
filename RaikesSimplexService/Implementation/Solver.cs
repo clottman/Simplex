@@ -379,9 +379,3 @@ namespace RaikesSimplexService.InsertTeamNameHere
         }
     }
 }
-
-<<<<<<< HEAD
-  
-=======
-// end of file
->>>>>>> master
