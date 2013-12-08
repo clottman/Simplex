@@ -361,7 +361,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             {
                 numArtificial = 0;
             }
-
+              
             return coefficients;
         }
 
@@ -379,5 +379,3 @@ namespace RaikesSimplexService.InsertTeamNameHere
         }
     }
 }
-
-// end of file
