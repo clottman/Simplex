@@ -260,7 +260,7 @@ namespace UnitTests
    
         //two phase
         [TestMethod()]
-        public void TwoPhaseClassTest()
+        public void RevisedClassTest()
         {
             #region Arrange
             var target = new Solver();
