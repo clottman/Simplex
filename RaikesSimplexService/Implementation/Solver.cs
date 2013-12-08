@@ -10,7 +10,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace RaikesSimplexService.InsertTeamNameHere
 {
-    
+
     public class Solver : ISolver
     {
         public DenseVector rhsValues { get; set; }
@@ -49,16 +49,17 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             //Maybe I could be smarter about where I put this (at the end of createMatrix?)
             //take care of artificial variable stuff
-            if(numArtificial > 0)
+            if (numArtificial > 0)
             {
                 //adds the z row to the coefficients matrix
-                    //adds the column first
+                //adds the column first
                 coefficients = (DenseMatrix)coefficients.Append(DenseVector.Create((coefficients.RowCount), delegate(int s) { return 0; }).ToColumnMatrix());
-                coefficients = (DenseMatrix)coefficients.InsertRow(coefficients.RowCount, DenseVector.Create(coefficients.ColumnCount, delegate(int s) {
+                coefficients = (DenseMatrix)coefficients.InsertRow(coefficients.RowCount, DenseVector.Create(coefficients.ColumnCount, delegate(int s)
+                {
                     if (s == coefficients.ColumnCount - 1)
                         return 1;
                     else
-                        return -objFunValues[s];
+                        return objFunValues[s];
                 }));
 
 
@@ -89,13 +90,13 @@ namespace RaikesSimplexService.InsertTeamNameHere
                             sum += coefficients[index, s];
                         }
 
-                        return sum;
+                        return -sum;
                     }
                     else
                     {
                         return 0;
                     }
-                }); 
+                });
 
                 //z is now a basic variable??
                 basics.Add(coefficients.ColumnCount - 1);
@@ -106,7 +107,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 optimize(coefficients, objFunValues, true);
 
                 basics.Remove(coefficients.ColumnCount - 1);
-                
+
                 //gets rid of the last value
                 rhsValues = (DenseVector)rhsValues.SubVector(0, (rhsValues.Count - 1));
 
@@ -129,7 +130,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             double[] solution = new double[model.Goal.Coefficients.Length];
             double op = model.Goal.ConstantTerm;
 
-            for(int i = 0; i < solution.Length; i++)
+            for (int i = 0; i < solution.Length; i++)
             {
                 solution[i] = xPrime[basics.IndexOf(i), 0];
                 op += solution[i] * model.Goal.Coefficients[i];
@@ -175,7 +176,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             bool optimal = false;
 
-            if(artifical)
+            if (artifical)
             {
                 rhsOverPPrime = new double[numConstraints + 1];
             }
@@ -209,7 +210,9 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     }
                     else
                     {
+                        //I might have written stuff that makes this else block unnecessary, but idk yet
                         pPrimes[i] = null;
+                        cPrimes[i] = 0;
                     }
                 }
 
@@ -219,9 +222,9 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 //Starts newEntering as the first nonbasic
                 newEntering = -1;
                 int iter = 0;
-                while(newEntering == -1) 
+                while (newEntering == -1)
                 {
-                    if(!basics.Contains(iter))
+                    if (!basics.Contains(iter))
                     {
                         newEntering = iter;
                     }
@@ -252,7 +255,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         double[,] pPrime = pPrimes[newEntering].ToArray();
                         rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
 
-                        if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0 )
+                        if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
                         {
                             exitingRow = i;
                         }
@@ -285,14 +288,14 @@ namespace RaikesSimplexService.InsertTeamNameHere
             this.rhsValues = new DenseVector(numConstraints);
             this.basics = new List<int>();
             this.artificialRows = new List<int>();
-            foreach (var constraint in model.Constraints) {
-                rhsValues[constraintCounter] = constraint.Value;
-    
+            foreach (var constraint in model.Constraints)
+            {
                 // if the constraint RHS is negative, invert the coefficients and flip the inequality sign
                 if (constraint.Value < 0)
                 {
-                    for (int i = 0; i< model.Goal.Coefficients.Length; i++) {
-                        model.Goal.Coefficients[i] = model.Goal.Coefficients[i] * -1;
+                    for (int i = 0; i < constraint.Coefficients.Length; i++)
+                    {
+                        constraint.Coefficients[i] = constraint.Coefficients[i] * -1;
                     }
                     if (constraint.Relationship == Relationship.LessThanOrEquals)
                     {
@@ -303,8 +306,11 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         constraint.Relationship = Relationship.LessThanOrEquals;
                     }
                     // also flip the rhs value which we already put in the array for the simplex setup
-                    rhsValues[constraintCounter] = rhsValues[constraintCounter] * -1;                   
+                    constraint.Value = constraint.Value * -1;
                 }
+
+                rhsValues[constraintCounter] = constraint.Value;
+
 
                 coefficients.SetRow(constraintCounter, 0, constraint.Coefficients.Length, new DenseVector(constraint.Coefficients));
                 // if it's a less than, add a slack column to the coefs matrix
@@ -346,24 +352,25 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 {
                     this.basics.Add(i);
                 }
-     
+
                 coefficients = (DenseMatrix)coefficients.Append(artificialVars);
 
                 numArtificial = artificialVars.ColumnCount;
             }
             else
             {
-                numArtificial = 0;  
+                numArtificial = 0;
             }
 
             return coefficients;
         }
 
-        public void printMat(DenseMatrix mattress) {
-            
-            for(int i = 0; i < mattress.RowCount; i++)
+        public void printMat(DenseMatrix mattress)
+        {
+
+            for (int i = 0; i < mattress.RowCount; i++)
             {
-                for(int j = 0; j < mattress.ColumnCount; j++)
+                for (int j = 0; j < mattress.ColumnCount; j++)
                 {
                     System.Diagnostics.Debug.Write(mattress[i, j] + "\t");
                 }
