@@ -45,3 +45,16 @@ C:\Users\Cassey\Dropbox\Sophomore year\Algorithms\RaikesSimplexSolverV12-7\Raike
 C:\Users\Cassey\Dropbox\Sophomore year\Algorithms\RaikesSimplexSolverV12-7\RaikesSimplexSolver\UnitTests\obj\Debug\UnitTests.csprojResolveAssemblyReference.cache
 C:\Users\Cassey\Dropbox\Sophomore year\Algorithms\RaikesSimplexSolverV12-7\RaikesSimplexSolver\UnitTests\obj\Debug\UnitTests.dll
 C:\Users\Cassey\Dropbox\Sophomore year\Algorithms\RaikesSimplexSolverV12-7\RaikesSimplexSolver\UnitTests\obj\Debug\UnitTests.pdb
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\UnitTests.dll
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\UnitTests.pdb
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\MathNet.Numerics.dll
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\MathNet.Numerics.IO.dll
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\RaikesSimplexService.dll
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\RaikesSimplexService.pdb
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\MathNet.Numerics.pdb
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\MathNet.Numerics.xml
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\MathNet.Numerics.IO.pdb
+C:\Users\Nathan\Simplex\UnitTests\bin\Debug\MathNet.Numerics.IO.xml
+C:\Users\Nathan\Simplex\UnitTests\obj\Debug\UnitTests.csprojResolveAssemblyReference.cache
+C:\Users\Nathan\Simplex\UnitTests\obj\Debug\UnitTests.dll
+C:\Users\Nathan\Simplex\UnitTests\obj\Debug\UnitTests.pdb
