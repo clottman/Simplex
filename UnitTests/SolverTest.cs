@@ -566,10 +566,10 @@ namespace UnitTests
 
             var expected = new Solution()
             {
-                Decisions = new double[21] { 3, 1, 0, 0, 2, 0, 0, 2, 5, 0, 0, 3, 0, 2, 4, 6, 0, 0, 5, 0, 0 },
+                Decisions = new double[21] { 3, 1, 0, 0, 2, 0, 0, 2, 4.5, 0, 0, 2.5, 0, 2.5, 4, 6, 0, 0, 5, 0, 0 },
                 Quality = SolutionQuality.Optimal,
                 AlternateSolutionsExist = false,
-                OptimalValue = 33
+                OptimalValue = 32.5
             };
             #endregion
 
