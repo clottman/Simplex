@@ -3,5 +3,10 @@ build/
 bin/
 UnitTests/obj/
 UnitTests/bin/
-UnitTests/obj/Debug
-/.suo
+UnitTests/obj/Debug/
+UnitTests/bin/Debug/
+*/.suo
+*.dll
+*.pdb
+*.suo
+*.cache

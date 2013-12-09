@@ -68,6 +68,71 @@ namespace UnitTests
         ///A test for Solve
         ///</summary>
         [TestMethod()]
+        public void TodaysClass()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 1
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 2, -1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 1
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 0, 3 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 2
+            };
+
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 6, 3 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Minimize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 1, 0 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 6
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+
+        /// <summary>
+        ///A test for Solve
+        ///</summary>
+        [TestMethod()]
         public void Simple2PhaseFromPaper()
         {
             #region Arrange
