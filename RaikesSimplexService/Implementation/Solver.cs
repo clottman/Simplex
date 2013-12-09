@@ -210,13 +210,14 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
                         //c' = objFunVals - cB * P'n
                         //At(0) to turn it into a double
-                        cPrimes[i] = objFunValues.At(i) - (pPrimes[i].LeftMultiply(cBVect)).At(0);
+                        DenseVector pPrimeTimesCB = (DenseVector)(pPrimes[i].LeftMultiply(cBVect));
+                        cPrimes[i] = objFunValues.At(i) - pPrimeTimesCB.At(0);
                     }
                     else
                     {
                         //I might have written stuff that makes this else block unnecessary, but idk yet
                         pPrimes[i] = null;
-                        cPrimes[i] = 0;
+                        cPrimes[i] = Double.NaN;
                     }
                 }
 
@@ -236,7 +237,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     iter++;
                 }
 
-                //new entering becomes the small cPrime that corresponds to a non-basic value
+                //new entering becomes the smallest cPrime that corresponds to a non-basic value
                 for (int i = 0; i < cPrimes.Length; i++)
                 {
                     if (cPrimes[i] < cPrimes[newEntering] && !(from aBasic in basics select aBasic.column).Contains(i))
@@ -265,7 +266,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         }
                     }
 
-                    var toFix = (from aBasic in basics where aBasic.row == exitingRow select aBasic).SingleOrDefault();
+                    //var toFix = (from aBasic in basics where aBasic.row == exitingRow select aBasic).SingleOrDefault();
+                    var toFix = basics[exitingRow];
                     toFix.column = newEntering;
 
                     b.SetColumn(basics.IndexOf(toFix), coefficients.Column(newEntering));
