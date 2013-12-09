@@ -5,4 +5,8 @@ UnitTests/obj/
 UnitTests/bin/
 UnitTests/obj/Debug/
 UnitTests/bin/Debug/
-/.suo
+*/.suo
+*.dll
+*.pdb
+*.suo
+*.cache
