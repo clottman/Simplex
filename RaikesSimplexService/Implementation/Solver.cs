@@ -98,7 +98,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         return 0;
                     }
                 });
-
+                
                 //z is now a basic variable??
                 BasicVar zBase = new BasicVar(coefficients.RowCount - 1, coefficients.ColumnCount - 1);
                 basics.Add(zBase);
@@ -165,6 +165,9 @@ namespace RaikesSimplexService.InsertTeamNameHere
             //Sets up the b matrix
             DenseMatrix b = new DenseMatrix(basics.Count, 1);
 
+            //basics : info about where the basic variables are
+            // b : columns that are for basic variables
+
             //basics will have values greater than coefficients.ColumnCount - 1 if there are still artificial variables
             //or if Nathan is bad and didn't get rid of them correctly
             foreach (BasicVar aBasic in basics)
@@ -181,7 +184,16 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             int newEntering, exitingRow;
 
-            bool optimal = false;
+            // if all of the objective function values are positive, we already have an optimal solution 
+            bool optimal = true;
+            int objFunIterator = 0;
+                while (optimal && objFunIterator < objFunValues.Count) {
+                // as soon as we find one that's negative, we know we still need to optimize
+                if (objFunValues[objFunIterator] < 0){
+                    optimal = false;
+                }
+                objFunIterator++;
+            }
 
             if (artifical)
             {
@@ -193,7 +205,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             }
 
             while (!optimal)
-            {
+            {   
                 //calculates the inverse of b for this iteration
                 bInverse = (DenseMatrix)b.Inverse();
 
@@ -207,7 +219,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 //calculates the pPrimes and cPrimes
                 for (int i = 0; i < coefficients.ColumnCount; i++)
                 {
-                    if (!(from aBasic in basics select aBasic.column).Contains(i))
+                    var basicCols = from aBasic in basics select aBasic.column;
+                    if (!basicCols.Contains(i))
                     {
                         pPrimes[i] = (DenseMatrix)bInverse.Multiply((DenseMatrix)coefficients.Column(i).ToColumnMatrix());
 
@@ -283,7 +296,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     {                      
                         if (rhsOverPPrime[i] <= rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
                         {
-                            exitingRow = i;
+                            // if they're equal, prioritize the one that is artifical
+                            if (rhsOverPPrime[i] == rhsOverPPrime[exitingRow] && artificialRows.Contains(exitingRow))
+                            {
+                                // exiting row stays the same
+                            }
+                            else
+                            {
+                                exitingRow = i;
+                            }
                         }
                     }
 
@@ -373,9 +394,13 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 {
                     // Need to add an artificial variable for >= and = constraints
 
-                    DenseVector surplus = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
-                    surplus.At(constraintCounter, -1);
-                    coefficients = (DenseMatrix)coefficients.Append(surplus.ToColumnMatrix());
+                    //adding surplus for just >=
+                    if (constraint.Relationship == Relationship.GreaterThanOrEquals)
+                    {
+                        DenseVector surplus = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
+                        surplus.At(constraintCounter, -1);
+                        coefficients = (DenseMatrix)coefficients.Append(surplus.ToColumnMatrix());
+                    }
 
                     DenseVector artificial = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
                     artificial.At(constraintCounter, 1);

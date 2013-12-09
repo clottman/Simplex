@@ -52,3 +52,15 @@ C:\Users\Nathan\Simplex\RaikesSimplexService\bin\Debug\MathNet.Numerics.IO.xml
 C:\Users\Nathan\Simplex\RaikesSimplexService\obj\Debug\RaikesSimplexService.csprojResolveAssemblyReference.cache
 C:\Users\Nathan\Simplex\RaikesSimplexService\obj\Debug\RaikesSimplexService.dll
 C:\Users\Nathan\Simplex\RaikesSimplexService\obj\Debug\RaikesSimplexService.pdb
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\RaikesSimplexService.dll.config
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\RaikesSimplexService.dll
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\RaikesSimplexService.pdb
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\MathNet.Numerics.dll
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\MathNet.Numerics.IO.dll
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\MathNet.Numerics.pdb
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\MathNet.Numerics.xml
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\MathNet.Numerics.IO.pdb
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\bin\Debug\MathNet.Numerics.IO.xml
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\obj\Debug\RaikesSimplexService.csprojResolveAssemblyReference.cache
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\obj\Debug\RaikesSimplexService.dll
+C:\Users\Cassey\Documents\Visual Studio 2012\Projects\RaikesSimplexSolver\RaikesSimplexService\obj\Debug\RaikesSimplexService.pdb
