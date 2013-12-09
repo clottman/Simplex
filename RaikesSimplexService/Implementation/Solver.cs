@@ -106,13 +106,16 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 printMat(coefficients);
 
                 //solves it for that
-                optimize(coefficients, objFunValues, true);
+                coefficients = optimize(coefficients, objFunValues, true);
 
+                printMat(coefficients);
+
+                //removes z from basics
                 var toRemove = (from aBasic in basics where aBasic.column == (coefficients.ColumnCount - 1) select aBasic).SingleOrDefault();
                 basics.Remove(toRemove);
 
-                //gets rid of the last value
-                rhsValues = (DenseVector)rhsValues.SubVector(0, (rhsValues.Count - 1));
+                //remakes the objective function
+                objFunValues = (DenseVector)coefficients.SubMatrix(coefficients.RowCount - 1, 1, 0, coefficients.ColumnCount - 1 - numArtificial).Row(0);
 
                 //chops off the z row and the artificial variables
                 coefficients = (DenseMatrix)coefficients.SubMatrix(0, coefficients.RowCount - 1, 0, coefficients.ColumnCount - 1 - numArtificial);
@@ -135,8 +138,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             for (int i = 0; i < solution.Length; i++)
             {
-                var row = (from aBasic in basics where aBasic.column == i select aBasic.row).SingleOrDefault();
-                solution[i] = xPrime[row, 0];
+                var row = (from aBasic in basics where aBasic.column == i select aBasic).SingleOrDefault();
+                solution[i] = xPrime[basics.IndexOf(row), 0];
                 op += solution[i] * model.Goal.Coefficients[i];
             }
 
@@ -152,7 +155,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             return sol;
         }
 
-        private void optimize(DenseMatrix coefficients, DenseVector objFunValues, bool artifical)
+        private DenseMatrix optimize(DenseMatrix coefficients, DenseVector objFunValues, bool artifical)
         {
             //for calculations on the optimal solution row
             int cCounter,
@@ -291,6 +294,33 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     b.SetColumn(basics.IndexOf(toFix), coefficients.Column(newEntering));
                 }
             }
+
+            if(artifical)
+            {
+                //do the things that change coefficients
+                for(int i = 0; i < pPrimes.Length; i++)
+                {
+                    if(pPrimes[i] != null)
+                    {
+                        coefficients.SetColumn(i, pPrimes[i].Column(0));
+                    }
+                }
+
+                for(int i = 0; i < basics.Count; i++)
+                {
+                    coefficients.SetColumn(basics[i].column, DenseVector.Create(coefficients.RowCount, delegate(int s)
+                    {
+                        if (s == i)
+                            return 1;
+                        else
+                            return 0;
+                    }));
+                }
+
+                rhsValues = (DenseVector)xPrime.SubMatrix(0, xPrime.RowCount - 1, 0, 1).Column(0);
+            }
+
+            return coefficients;
         }
 
         public DenseMatrix createMatrix(Model model)
