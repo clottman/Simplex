@@ -98,7 +98,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         return 0;
                     }
                 });
-
+                
                 //z is now a basic variable??
                 BasicVar zBase = new BasicVar(coefficients.RowCount - 1, coefficients.ColumnCount - 1);
                 basics.Add(zBase);
@@ -184,7 +184,16 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             int newEntering, exitingRow;
 
-            bool optimal = false;
+            // if all of the objective function values are positive, we already have an optimal solution 
+            bool optimal = true;
+            int objFunIterator = 0;
+                while (optimal && objFunIterator < objFunValues.Count) {
+                // as soon as we find one that's negative, we know we still need to optimize
+                if (objFunValues[objFunIterator] < 0){
+                    optimal = false;
+                }
+                objFunIterator++;
+            }
 
             if (artifical)
             {
@@ -196,7 +205,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             }
 
             while (!optimal)
-            {
+            {   
                 //calculates the inverse of b for this iteration
                 bInverse = (DenseMatrix)b.Inverse();
 
@@ -287,7 +296,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     {                      
                         if (rhsOverPPrime[i] <= rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
                         {
-                            exitingRow = i;
+                            // if they're equal, prioritize the one that is artifical
+                            if (rhsOverPPrime[i] == rhsOverPPrime[exitingRow] && artificialRows.Contains(exitingRow))
+                            {
+                                // exiting row stays the same
+                            }
+                            else
+                            {
+                                exitingRow = i;
+                            }
                         }
                     }
 
