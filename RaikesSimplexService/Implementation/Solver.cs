@@ -236,7 +236,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     iter++;
                 }
 
-                //new entering becomes the small cPrime that corresponds to a non-basic value
+                //new entering becomes the smallest cPrime that corresponds to a non-basic value
                 for (int i = 0; i < cPrimes.Length; i++)
                 {
                     if (cPrimes[i] < cPrimes[newEntering] && !(from aBasic in basics select aBasic.column).Contains(i))
