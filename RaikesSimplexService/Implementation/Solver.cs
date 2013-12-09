@@ -165,6 +165,9 @@ namespace RaikesSimplexService.InsertTeamNameHere
             //Sets up the b matrix
             DenseMatrix b = new DenseMatrix(basics.Count, 1);
 
+            //basics : info about where the basic variables are
+            // b : columns that are for basic variables
+
             //basics will have values greater than coefficients.ColumnCount - 1 if there are still artificial variables
             //or if Nathan is bad and didn't get rid of them correctly
             foreach (BasicVar aBasic in basics)
@@ -207,7 +210,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 //calculates the pPrimes and cPrimes
                 for (int i = 0; i < coefficients.ColumnCount; i++)
                 {
-                    if (!(from aBasic in basics select aBasic.column).Contains(i))
+                    var basicCols = from aBasic in basics select aBasic.column;
+                    if (!basicCols.Contains(i))
                     {
                         pPrimes[i] = (DenseMatrix)bInverse.Multiply((DenseMatrix)coefficients.Column(i).ToColumnMatrix());
 
