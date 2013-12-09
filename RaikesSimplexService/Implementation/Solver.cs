@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq;  
 using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
@@ -262,8 +262,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     }
                 }
 
-                //if the smallest cPrime is >= 0, ie they are all positive
-                if (cPrimes[newEntering] >= 0)
+                //if the smallest cPrime is >= 0, ie they are all positive (accounting for small rounding errors from floating points)
+                if (cPrimes[newEntering] >= -0.0000001)
                 {
                     optimal = true;
                 }
