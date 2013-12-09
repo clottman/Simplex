@@ -293,18 +293,25 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     //if iter == xPrime.RowCount now, then it's unbounded, I think
 
                     for (int i = 0; i < xPrime.RowCount; i++)
-                    {                      
-                        if (rhsOverPPrime[i] <= rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
+                    {
+                        int z;
+                        if (artifical)
+                        {
+                            z = 1;
+                        }
+                        else
+                        {
+                            z = 0;
+                        }
+
+                        if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
+                        {
+                            exitingRow = i;
+                        }
+                        else if(rhsOverPPrime[i] == rhsOverPPrime[exitingRow] && (basics[i].column >= coefficients.ColumnCount - numArtificial - z))
                         {
                             // if they're equal, prioritize the one that is artifical
-                            if (rhsOverPPrime[i] == rhsOverPPrime[exitingRow] && artificialRows.Contains(exitingRow))
-                            {
-                                // exiting row stays the same
-                            }
-                            else
-                            {
-                                exitingRow = i;
-                            }
+                            exitingRow = i;
                         }
                     }
 
