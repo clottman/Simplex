@@ -3,5 +3,6 @@ build/
 bin/
 UnitTests/obj/
 UnitTests/bin/
-UnitTests/obj/Debug
+UnitTests/obj/Debug/
+UnitTests/bin/Debug/
 /.suo
