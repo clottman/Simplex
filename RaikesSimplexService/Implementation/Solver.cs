@@ -253,14 +253,32 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 }
                 else
                 {
-                    //fix me to deal with if all these values are negative
-                    exitingRow = 0;
-                    for (int i = 0; i < xPrime.RowCount; i++)
+                    for (int i = 0; i < xPrime.RowCount; i++ )
                     {
                         double[,] pPrime = pPrimes[newEntering].ToArray();
                         rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
+                    }
 
-                        if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
+                    //fix me to deal with if all these values are negative
+                    exitingRow = -1;
+                    iter = 0;
+                    while(exitingRow == -1 && iter < xPrime.RowCount)
+                    {
+                        if (rhsOverPPrime[iter] > 0)
+                        {
+                            exitingRow = iter;
+                        }
+                        else
+                        {
+                            iter++;
+                        }
+                    }
+
+                    //if iter == xPrime.RowCount now, then it's unbounded, I think
+
+                    for (int i = 0; i < xPrime.RowCount; i++)
+                    {                      
+                        if (rhsOverPPrime[i] <= rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
                         {
                             exitingRow = i;
                         }
