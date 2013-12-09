@@ -373,9 +373,13 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 {
                     // Need to add an artificial variable for >= and = constraints
 
-                    DenseVector surplus = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
-                    surplus.At(constraintCounter, -1);
-                    coefficients = (DenseMatrix)coefficients.Append(surplus.ToColumnMatrix());
+                    //adding surplus for just >=
+                    if (constraint.Relationship == Relationship.GreaterThanOrEquals)
+                    {
+                        DenseVector surplus = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
+                        surplus.At(constraintCounter, -1);
+                        coefficients = (DenseMatrix)coefficients.Append(surplus.ToColumnMatrix());
+                    }
 
                     DenseVector artificial = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
                     artificial.At(constraintCounter, 1);
