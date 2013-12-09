@@ -13,9 +13,10 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
     public class Solver : ISolver
     {
+
         public DenseVector rhsValues { get; set; }
 
-        public List<int> basics { get; set; }
+        public List<BasicVar> basics { get; set; }
 
         public int numConstraints { get; set; }
 
@@ -99,14 +100,16 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 });
 
                 //z is now a basic variable??
-                basics.Add(coefficients.ColumnCount - 1);
+                BasicVar zBase = new BasicVar(coefficients.RowCount - 1, coefficients.ColumnCount - 1);
+                basics.Add(zBase);
 
                 printMat(coefficients);
 
                 //solves it for that
                 optimize(coefficients, objFunValues, true);
 
-                basics.Remove(coefficients.ColumnCount - 1);
+                var toRemove = (from aBasic in basics where aBasic.column == (coefficients.ColumnCount - 1) select aBasic).SingleOrDefault();
+                basics.Remove(toRemove);
 
                 //gets rid of the last value
                 rhsValues = (DenseVector)rhsValues.SubVector(0, (rhsValues.Count - 1));
@@ -132,7 +135,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             for (int i = 0; i < solution.Length; i++)
             {
-                solution[i] = xPrime[basics.IndexOf(i), 0];
+                var row = (from aBasic in basics where aBasic.column == i select aBasic.row).SingleOrDefault();
+                solution[i] = xPrime[row, 0];
                 op += solution[i] * model.Goal.Coefficients[i];
             }
 
@@ -160,9 +164,9 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             //basics will have values greater than coefficients.ColumnCount - 1 if there are still artificial variables
             //or if Nathan is bad and didn't get rid of them correctly
-            foreach (int index in basics)
+            foreach (BasicVar aBasic in basics)
             {
-                b = (DenseMatrix)b.Append(DenseVector.OfVector(coefficients.Column(index)).ToColumnMatrix());
+                b = (DenseMatrix)b.Append(DenseVector.OfVector(coefficients.Column(aBasic.column)).ToColumnMatrix());
             }
             // removes the first column
             b = (DenseMatrix)b.SubMatrix(0, b.RowCount, 1, b.ColumnCount - 1);
@@ -192,15 +196,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
                 //updates the C vector with the most recent basic variables
                 cCounter = 0;
-                foreach (int index in basics)
+                foreach (BasicVar aBasic in basics)
                 {
-                    cBVect[cCounter++] = objFunValues.At(index);
+                    cBVect[cCounter++] = objFunValues.At(aBasic.column);
                 }
 
                 //calculates the pPrimes and cPrimes
                 for (int i = 0; i < coefficients.ColumnCount; i++)
                 {
-                    if (!basics.Contains(i))
+                    if (!(from aBasic in basics select aBasic.column).Contains(i))
                     {
                         pPrimes[i] = (DenseMatrix)bInverse.Multiply((DenseMatrix)coefficients.Column(i).ToColumnMatrix());
 
@@ -224,7 +228,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 int iter = 0;
                 while (newEntering == -1)
                 {
-                    if (!basics.Contains(iter))
+                    if (!(from aBasic in basics select aBasic.column).Contains(iter))
                     {
                         newEntering = iter;
                     }
@@ -235,7 +239,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 //new entering becomes the small cPrime that corresponds to a non-basic value
                 for (int i = 0; i < cPrimes.Length; i++)
                 {
-                    if (cPrimes[i] < cPrimes[newEntering] && !basics.Contains(i))
+                    if (cPrimes[i] < cPrimes[newEntering] && !(from aBasic in basics select aBasic.column).Contains(i))
                     {
                         newEntering = i;
                     }
@@ -261,17 +265,10 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         }
                     }
 
-                    //translates from the index in the basics list to the actual row
-                    exitingRow = basics[exitingRow];
+                    var toFix = (from aBasic in basics where aBasic.row == exitingRow select aBasic).SingleOrDefault();
+                    toFix.column = newEntering;
 
-
-                    //make sure you're not being stupid here!!!!
-                    int tempIndex = basics.IndexOf(exitingRow);
-                    basics.Remove(exitingRow);
-
-                    basics.Insert(tempIndex, newEntering);
-
-                    b.SetColumn(basics.IndexOf(newEntering), coefficients.Column(newEntering));
+                    b.SetColumn(basics.IndexOf(toFix), coefficients.Column(newEntering));
                 }
             }
         }
@@ -286,7 +283,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             DenseMatrix artificialVars = new DenseMatrix(numConstraints, 1);
             var constraintCounter = 0;
             this.rhsValues = new DenseVector(numConstraints);
-            this.basics = new List<int>();
+            this.basics = new List<BasicVar>();
             this.artificialRows = new List<int>();
             foreach (var constraint in model.Constraints)
             {
@@ -320,7 +317,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     slack.At(constraintCounter, 1);
                     coefficients = (DenseMatrix)coefficients.Append(slack.ToColumnMatrix());
 
-                    this.basics.Add(varCounter);
+                    this.basics.Add(new BasicVar(constraintCounter, varCounter));
                 }
                 else
                 {
@@ -350,7 +347,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
                 for (int i = coefficients.ColumnCount; i < coefficients.ColumnCount + artificialVars.ColumnCount; i++)
                 {
-                    this.basics.Add(i);
+                    this.basics.Add(new BasicVar(artificialRows[i - coefficients.ColumnCount], i));
                 }
 
                 coefficients = (DenseMatrix)coefficients.Append(artificialVars);
@@ -361,7 +358,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             {
                 numArtificial = 0;
             }
-              
+
             return coefficients;
         }
 
