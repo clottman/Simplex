@@ -243,12 +243,12 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         DenseVector pPrimeTimesCB = (DenseVector)(pPrimes[i].LeftMultiply(cBVect));
                         cPrimes[i] = objFunValues.At(i) - pPrimeTimesCB.At(0);
                     }
-                    else
-                    {
-                        //I might have written stuff that makes this else block unnecessary, but idk yet
-                        pPrimes[i] = null;
-                        cPrimes[i] = Double.NaN;
-                    }
+ //                   else
+ //                     {
+  //                      //I might have written stuff that makes this else block unnecessary, but idk yet
+   //                     pPrimes[i] = null;
+   //                     cPrimes[i] = Double.NaN;
+   //                 }
                 }
 
                 //RHS'
@@ -304,7 +304,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         }
                     }
 
-                    //if iter == xPrime.RowCount now, then it's unbounded, I think
+                    //if exitingRow is still -1, then is is unbounded
+
 
                     for (int i = 0; i < xPrime.RowCount; i++)
                     {
