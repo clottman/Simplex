@@ -852,10 +852,7 @@ namespace UnitTests
 
             var expected = new Solution()
             {
-                Decisions = new double[4] { 0, .71, .29, 0 },
-                Quality = SolutionQuality.Optimal,
-                AlternateSolutionsExist = false,
-                OptimalValue = -0.71
+                Quality = SolutionQuality.Infeasible,
             };
             #endregion
 
@@ -863,9 +860,7 @@ namespace UnitTests
             var actual = target.Solve(model);
 
             //Assert
-            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
             Assert.AreEqual(expected.Quality, actual.Quality);
-            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
 
         }
 
