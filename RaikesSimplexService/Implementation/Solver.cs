@@ -410,6 +410,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     coefficients = (DenseMatrix)coefficients.Append(slack.ToColumnMatrix());
 
                     this.basics.Add(new BasicVar(constraintCounter, varCounter));
+                    varCounter++;
                 }
                 else
                 {
@@ -421,6 +422,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         DenseVector surplus = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
                         surplus.At(constraintCounter, -1);
                         coefficients = (DenseMatrix)coefficients.Append(surplus.ToColumnMatrix());
+                        varCounter++;
                     }
 
                     DenseVector artificial = DenseVector.Create(model.Constraints.Count, delegate(int s) { return 0; });
@@ -430,7 +432,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     // Keeps track of the rows with artificial variable, for setting w
                     artificialRows.Add(constraintCounter);
                 }
-                varCounter++;
+                
                 constraintCounter++;
             }
 
