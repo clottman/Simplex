@@ -40,7 +40,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             objFunValues.SetSubVector(0, objFunCoeffs.Count, objFunCoeffs);
 
             //flips the sign of everything
-            if (model.GoalKind == GoalKind.Maximize)
+           if (model.GoalKind == GoalKind.Maximize)
             {
                 objFunValues = DenseVector.Create((coefficients.ColumnCount), delegate(int s) { return -objFunValues[s]; });
             }
@@ -252,7 +252,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 }
 
                 //RHS'
-                xPrime = (DenseMatrix)bInverse.Multiply((DenseMatrix)rhsValues.ToColumnMatrix());
+                 xPrime = (DenseMatrix)bInverse.Multiply((DenseMatrix)rhsValues.ToColumnMatrix());
 
                 //Starts newEntering as the first nonbasic
                 newEntering = -1;

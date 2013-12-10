@@ -1096,7 +1096,8 @@ namespace UnitTests
             var e = new LinearConstraint()
             {
                 Coefficients = new double[12] { 0, 0, 0, 0, 0, 0, -.5, .5, .5, 0, 0, 0 },
-                Relationship = Relationship.GreaterThanOrEquals,
+                Relationship = Relationship.LessThanOrEquals,
+                //flipped this one, and I think it should be like this
                 Value = 0
             };
 
