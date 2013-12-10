@@ -1573,10 +1573,8 @@ namespace UnitTests
             var actual = target.Solve(model);
 
             //Assert
-            //CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
-            Assert.IsTrue(ApproxEqualArray(expected.Decisions, actual.Decisions));
-            //Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
-            Assert.IsTrue(ApproxEqual(expected.OptimalValue, actual.OptimalValue));
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
             Assert.AreEqual(expected.Quality, actual.Quality);
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
         }
