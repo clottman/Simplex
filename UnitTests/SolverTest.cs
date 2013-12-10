@@ -801,6 +801,7 @@ namespace UnitTests
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
         }
 
+        [TestMethod()]
         public void NegativeRHSTest()
         {
             #region Arrange
