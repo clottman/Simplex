@@ -139,9 +139,23 @@ namespace RaikesSimplexService.InsertTeamNameHere
             for (int i = 0; i < solution.Length; i++)
             {
                 var row = (from aBasic in basics where aBasic.column == i select aBasic).SingleOrDefault();
-                solution[i] = xPrime[basics.IndexOf(row), 0];
+
+                if (basics.Contains(row))
+                {
+                    solution[i] = xPrime[basics.IndexOf(row), 0];
+                }
+                else
+                {
+                    //NOT SURE IF THIS IS LEGAL BUT YEAAAAH
+                    solution[i] = 0;
+                }
+
+
                 op += solution[i] * model.Goal.Coefficients[i];
             }
+
+
+
 
             Solution sol = new Solution()
             {

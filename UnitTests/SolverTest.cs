@@ -107,7 +107,7 @@ namespace UnitTests
             {
                 Constraints = constraints,
                 Goal = goal,
-                GoalKind = GoalKind.Minimize
+                GoalKind = GoalKind.Maximize
             };
 
             var expected = new Solution()
