@@ -373,8 +373,16 @@ namespace RaikesSimplexService.InsertTeamNameHere
             for (int i = 0; i < xPrime.RowCount; i++)
             {
                 double[,] pPrime = pPrimes[newEntering].ToArray();
+				double pPrimeVal = pPrime[i, 0]; 		              
+					if (pPrimeVal != 0)	 	
+					{	 	
                 rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
             }
+					else	 	
+					{	 	
+						rhsOverPPrime[i] = Double.PositiveInfinity;	 	
+					}	
+			}
 
             int exitingRow = -1;
             iter = 0;
@@ -437,7 +445,12 @@ namespace RaikesSimplexService.InsertTeamNameHere
             for (int i = 0; i < xPrime.RowCount; i++)
             {
                 double[,] pPrime = pPrimes[newEntering].ToArray();
+				double pPrimeVal = pPrime[i, 0];
+	            if (pPrimeVal != 0) {	 	
                 rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
+	            } else {	 	
+	                rhsOverPPrime[i] = Double.PositiveInfinity;	 	
+	            }
             }
 
             int exitingRow = -1;
