@@ -114,6 +114,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
                 PrintMat(coefficients);
 
+                //check for infeasible
+                foreach(int basicCol in (from aBasic in basics select aBasic.column))
+                {
+                    if(basicCol >= coefficients.ColumnCount - numArtificial - 1 && basicCol != coefficients.ColumnCount - 1)
+                    {
+                        solQual = SolutionQuality.Infeasible;
+                    }
+                }
+
                 //removes z from basics
                 var toRemove = (from aBasic in basics where aBasic.column == (coefficients.ColumnCount - 1) select aBasic).SingleOrDefault();
                 basics.Remove(toRemove);
@@ -125,8 +134,11 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 coefficients = (DenseMatrix)coefficients.SubMatrix(0, coefficients.RowCount - 1, 0, coefficients.ColumnCount - 1 - numArtificial);
             }
 
-            PrintMat(coefficients);
-            Optimize(coefficients, objFunValues, false);
+            if (solQual != SolutionQuality.Infeasible)
+            {
+                PrintMat(coefficients);
+                Optimize(coefficients, objFunValues, false);
+            }
 
             /*
              * To find the solution:
@@ -269,6 +281,11 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 {
                     exitingRow = FindExitingRow(pPrimes, newEntering, artifical, coefficients.ColumnCount);
 
+                    if(exitingRow == -1)
+                    {
+                        exitingRow = FindExitingRowDegenerate(pPrimes, newEntering, artifical, coefficients.ColumnCount);
+                    }
+
                     if (exitingRow == -1)
                     {
                         solQual = SolutionQuality.Unbounded;
@@ -352,12 +369,11 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
             }
 
-            //fix me to deal with if all these values are negative
             int exitingRow = -1;
             iter = 0;
             while (exitingRow == -1 && iter < xPrime.RowCount)
             {
-                if (rhsOverPPrime[iter] > 0)
+                if (rhsOverPPrime[iter] > 0 && !Double.IsInfinity(rhsOverPPrime[iter]))
                 {
                     exitingRow = iter;
                 }
@@ -381,7 +397,71 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         z = 0;
                     }
 
-                    if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
+                    if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0 &&  !Double.IsInfinity(rhsOverPPrime[iter]))
+                    {
+                        exitingRow = i;
+                    }
+                    else if (rhsOverPPrime[i] == rhsOverPPrime[exitingRow] && (basics[i].column >= coefficientsLength - numArtificial - z))
+                    {
+                        // if they're equal, prioritize the one that is artifical
+                        exitingRow = i;
+                    }
+                }
+            }           
+            return exitingRow;
+        }
+
+
+        public int FindExitingRowDegenerate(DenseMatrix[] pPrimes, int newEntering, bool artificial, int coefficientsLength)
+        {
+            int iter;
+            double[] rhsOverPPrime;
+
+
+            if (artificial)
+            {
+                rhsOverPPrime = new double[numConstraints + 1];
+            }
+            else
+            {
+                rhsOverPPrime = new double[numConstraints];
+            }
+
+            for (int i = 0; i < xPrime.RowCount; i++)
+            {
+                double[,] pPrime = pPrimes[newEntering].ToArray();
+                rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
+            }
+
+            int exitingRow = -1;
+            iter = 0;
+            while (exitingRow == -1 && iter < xPrime.RowCount)
+            {
+                if (rhsOverPPrime[iter] >= 0)
+                {
+                    exitingRow = iter;
+                }
+                else
+                {
+                    iter++;
+                }
+            }
+
+            if (exitingRow != -1)
+            {
+                for (int i = 0; i < xPrime.RowCount; i++)
+                {
+                    int z;
+                    if (artificial)
+                    {
+                        z = 1;
+                    }
+                    else
+                    {
+                        z = 0;
+                    }
+
+                    if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] >= 0)
                     {
                         exitingRow = i;
                     }
