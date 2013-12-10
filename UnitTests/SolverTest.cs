@@ -323,7 +323,7 @@ namespace UnitTests
 
 
    
-        //two phase
+        //two phase  but not really, Nathan's bad at naming
         [TestMethod()]
         public void RevisedClassTest()
         {
@@ -1214,5 +1214,239 @@ namespace UnitTests
         }
     
 
+        // from first simplex slides
+        [TestMethod()]
+        public void SinglePhaseTest()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 10, 5 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 50
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 6, 6 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 36
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 4.5, 18 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 81
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 9, 7 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 4, 2 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 50
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+        // from internets
+        [TestMethod()]
+        public void OnePhaseTest()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 2, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 8
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 5
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2};
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 1, 2 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 0, 5 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 10
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+        // from internet
+        [TestMethod()]
+        public void SimpleTwoPhase()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 4
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 2, 1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 6
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Minimize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 2, 2 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 4
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+
+        // from the internets
+        [TestMethod()]
+        public void AnotherTwoPhase()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[3] { 1, 1, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 40
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[3] { 2, 1, -1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 10
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[3] { 0, -1, 1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 10
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[3] { 2, 3, 1 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[3] { 10, 10, 20 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = 70
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+
+
     }
+
 }
