@@ -26,11 +26,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
         public List<int> artificialRows { get; set; }
 
+        public SolutionQuality solQual { get; set; }
+
         public Solution Solve(Model model)
         {
+            solQual = SolutionQuality.Optimal;
+
             DenseVector testVect = DenseVector.Create(10, delegate(int s) { return s; });
 
-            DenseMatrix coefficients = createMatrix(model);
+            DenseMatrix coefficients = CreateMatrix(model);
 
             //gets the coefficients from the goal
             DenseVector objFunCoeffs = new DenseVector(model.Goal.Coefficients);
@@ -103,12 +107,12 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 BasicVar zBase = new BasicVar(coefficients.RowCount - 1, coefficients.ColumnCount - 1);
                 basics.Add(zBase);
 
-                printMat(coefficients);
+                PrintMat(coefficients);
 
                 //solves it for that
-                coefficients = optimize(coefficients, objFunValues, true);
+                coefficients = Optimize(coefficients, objFunValues, true);
 
-                printMat(coefficients);
+                PrintMat(coefficients);
 
                 //removes z from basics
                 var toRemove = (from aBasic in basics where aBasic.column == (coefficients.ColumnCount - 1) select aBasic).SingleOrDefault();
@@ -121,8 +125,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 coefficients = (DenseMatrix)coefficients.SubMatrix(0, coefficients.RowCount - 1, 0, coefficients.ColumnCount - 1 - numArtificial);
             }
 
-            printMat(coefficients);
-            optimize(coefficients, objFunValues, false);
+            PrintMat(coefficients);
+            Optimize(coefficients, objFunValues, false);
 
             /*
              * To find the solution:
@@ -147,7 +151,6 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 }
                 else
                 {
-                    //NOT SURE IF THIS IS LEGAL BUT YEAAAAH
                     solution[i] = 0;
                 }
 
@@ -162,21 +165,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 Decisions = solution,
                 OptimalValue = op,
                 AlternateSolutionsExist = false,
-                Quality = SolutionQuality.Optimal
+                Quality = solQual
             };
 
 
             return sol;
         }
 
-        private DenseMatrix optimize(DenseMatrix coefficients, DenseVector objFunValues, bool artifical)
+        public DenseMatrix InitializeB(DenseMatrix coefficients)
         {
-            //for calculations on the optimal solution row
-            int cCounter,
-                width = coefficients.ColumnCount;
-            DenseVector cBVect = new DenseVector(basics.Count);
-
-            //Sets up the b matrix
             DenseMatrix b = new DenseMatrix(basics.Count, 1);
 
             //basics : info about where the basic variables are
@@ -191,34 +188,47 @@ namespace RaikesSimplexService.InsertTeamNameHere
             // removes the first column
             b = (DenseMatrix)b.SubMatrix(0, b.RowCount, 1, b.ColumnCount - 1);
 
+            return b;
+        }
+
+        public bool AlreadyOptimal(DenseVector objFunValues)
+        {
+            bool optimal = true;
+            int objFunIterator = 0;
+            while (optimal && objFunIterator < objFunValues.Count)
+            {
+                // as soon as we find one that's negative, we know we still need to optimize
+                if (objFunValues[objFunIterator] < 0)
+                {
+                    optimal = false;
+                }
+                objFunIterator++;
+            }
+
+            return optimal;
+        }
+
+        public DenseMatrix Optimize(DenseMatrix coefficients, DenseVector objFunValues, bool artifical)
+        {
+            //for calculations on the optimal solution row
+            int cCounter,
+                width = coefficients.ColumnCount;
+            DenseVector cBVect = new DenseVector(basics.Count);
+
+            //Sets up the b matrix
+            DenseMatrix b = InitializeB(coefficients);
             double[] cPrimes = new double[width];
-            double[] rhsOverPPrime;
             DenseMatrix[] pPrimes = new DenseMatrix[width];
             DenseMatrix bInverse;
 
             int newEntering, exitingRow;
 
             // if all of the objective function values are positive, we already have an optimal solution 
-            bool optimal = true;
-            int objFunIterator = 0;
-                while (optimal && objFunIterator < objFunValues.Count) {
-                // as soon as we find one that's negative, we know we still need to optimize
-                if (objFunValues[objFunIterator] < 0){
-                    optimal = false;
-                }
-                objFunIterator++;
-            }
+            bool optimal = AlreadyOptimal(objFunValues);
+            bool unbounded = false;
 
-            if (artifical)
-            {
-                rhsOverPPrime = new double[numConstraints + 1];
-            }
-            else
-            {
-                rhsOverPPrime = new double[numConstraints];
-            }
 
-            while (!optimal)
+            while (!optimal && !unbounded)
             {   
                 //calculates the inverse of b for this iteration
                 bInverse = (DenseMatrix)b.Inverse();
@@ -243,38 +253,12 @@ namespace RaikesSimplexService.InsertTeamNameHere
                         DenseVector pPrimeTimesCB = (DenseVector)(pPrimes[i].LeftMultiply(cBVect));
                         cPrimes[i] = objFunValues.At(i) - pPrimeTimesCB.At(0);
                     }
- //                   else
- //                     {
-  //                      //I might have written stuff that makes this else block unnecessary, but idk yet
-   //                     pPrimes[i] = null;
-   //                     cPrimes[i] = Double.NaN;
-   //                 }
                 }
 
                 //RHS'
-                 xPrime = (DenseMatrix)bInverse.Multiply((DenseMatrix)rhsValues.ToColumnMatrix());
+                xPrime = (DenseMatrix)bInverse.Multiply((DenseMatrix)rhsValues.ToColumnMatrix());
 
-                //Starts newEntering as the first nonbasic
-                newEntering = -1;
-                int iter = 0;
-                while (newEntering == -1)
-                {
-                    if (!(from aBasic in basics select aBasic.column).Contains(iter))
-                    {
-                        newEntering = iter;
-                    }
-
-                    iter++;
-                }
-
-                //new entering becomes the smallest cPrime that corresponds to a non-basic value
-                for (int i = 0; i < cPrimes.Length; i++)
-                {
-                    if (cPrimes[i] < cPrimes[newEntering] && !(from aBasic in basics select aBasic.column).Contains(i))
-                    {
-                        newEntering = i;
-                    }
-                }
+                newEntering = FindNewEntering(cPrimes);
 
                 //if the smallest cPrime is >= 0, ie they are all positive (accounting for small rounding errors from floating points)
                 if (cPrimes[newEntering] >= -0.0000001)
@@ -283,90 +267,163 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 }
                 else
                 {
-                    for (int i = 0; i < xPrime.RowCount; i++ )
+                    exitingRow = FindExitingRow(pPrimes, newEntering, artifical, coefficients.ColumnCount);
+
+                    if (exitingRow == -1)
                     {
-                        double[,] pPrime = pPrimes[newEntering].ToArray();
-                        rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
-                    }
+                        solQual = SolutionQuality.Unbounded;
 
-                    //fix me to deal with if all these values are negative
-                    exitingRow = -1;
-                    iter = 0;
-                    while(exitingRow == -1 && iter < xPrime.RowCount)
+                        unbounded = true;
+                    }
+                    else
                     {
-                        if (rhsOverPPrime[iter] > 0)
-                        {
-                            exitingRow = iter;
-                        }
-                        else
-                        {
-                            iter++;
-                        }
+                        b = UpdateBasicsMatrix(exitingRow, newEntering, b, coefficients);
                     }
-
-                    //if exitingRow is still -1, then is is unbounded
-
-
-                    for (int i = 0; i < xPrime.RowCount; i++)
-                    {
-                        int z;
-                        if (artifical)
-                        {
-                            z = 1;
-                        }
-                        else
-                        {
-                            z = 0;
-                        }
-
-                        if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
-                        {
-                            exitingRow = i;
-                        }
-                        else if(rhsOverPPrime[i] == rhsOverPPrime[exitingRow] && (basics[i].column >= coefficients.ColumnCount - numArtificial - z))
-                        {
-                            // if they're equal, prioritize the one that is artifical
-                            exitingRow = i;
-                        }
-                    }
-
-                    //var toFix = (from aBasic in basics where aBasic.row == exitingRow select aBasic).SingleOrDefault();
-                    var toFix = basics[exitingRow];
-                    toFix.column = newEntering;
-
-                    b.SetColumn(basics.IndexOf(toFix), coefficients.Column(newEntering));
                 }
             }
 
-            if(artifical)
+            if(artifical && !unbounded)
             {
-                //do the things that change coefficients
-                for(int i = 0; i < pPrimes.Length; i++)
-                {
-                    if(pPrimes[i] != null)
-                    {
-                        coefficients.SetColumn(i, pPrimes[i].Column(0));
-                    }
-                }
-
-                for(int i = 0; i < basics.Count; i++)
-                {
-                    coefficients.SetColumn(basics[i].column, DenseVector.Create(coefficients.RowCount, delegate(int s)
-                    {
-                        if (s == i)
-                            return 1;
-                        else
-                            return 0;
-                    }));
-                }
-
-                rhsValues = (DenseVector)xPrime.SubMatrix(0, xPrime.RowCount - 1, 0, 1).Column(0);
+                coefficients = ReformatMatrix(pPrimes, coefficients);
             }
 
             return coefficients;
         }
 
-        public DenseMatrix createMatrix(Model model)
+
+        public int FindNewEntering(double[] cPrimes)
+        {
+            //Starts newEntering as the first nonbasic
+            int newEntering = -1;
+            int iter = 0;
+            while (newEntering == -1)
+            {
+                if (!(from aBasic in basics select aBasic.column).Contains(iter))
+                {
+                    newEntering = iter;
+                }
+
+                iter++;
+            }
+
+            //new entering becomes the smallest cPrime that corresponds to a non-basic value
+            for (int i = 0; i < cPrimes.Length; i++)
+            {
+                if (cPrimes[i] < cPrimes[newEntering] && !(from aBasic in basics select aBasic.column).Contains(i))
+                {
+                    newEntering = i;
+                }
+            }
+
+            return newEntering;
+        }
+
+
+        public DenseMatrix UpdateBasicsMatrix(int exitingRow, int newEntering, DenseMatrix b, DenseMatrix coefficients)
+        {
+            //var toFix = (from aBasic in basics where aBasic.row == exitingRow select aBasic).SingleOrDefault();
+            var toFix = basics[exitingRow];
+            toFix.column = newEntering;
+
+            b.SetColumn(basics.IndexOf(toFix), coefficients.Column(newEntering));
+
+            return b;
+        }
+
+
+        public int FindExitingRow(DenseMatrix[] pPrimes, int newEntering, bool artificial, int coefficientsLength)
+        {
+            int iter;
+            double[] rhsOverPPrime;
+
+
+            if (artificial)
+            {
+                rhsOverPPrime = new double[numConstraints + 1];
+            }
+            else
+            {
+                rhsOverPPrime = new double[numConstraints];
+            }
+
+            for (int i = 0; i < xPrime.RowCount; i++)
+            {
+                double[,] pPrime = pPrimes[newEntering].ToArray();
+                rhsOverPPrime[i] = xPrime.ToArray()[i, 0] / pPrime[i, 0];
+            }
+
+            //fix me to deal with if all these values are negative
+            int exitingRow = -1;
+            iter = 0;
+            while (exitingRow == -1 && iter < xPrime.RowCount)
+            {
+                if (rhsOverPPrime[iter] > 0)
+                {
+                    exitingRow = iter;
+                }
+                else
+                {
+                    iter++;
+                }
+            }
+
+            if (exitingRow != -1)
+            {
+                for (int i = 0; i < xPrime.RowCount; i++)
+                {
+                    int z;
+                    if (artificial)
+                    {
+                        z = 1;
+                    }
+                    else
+                    {
+                        z = 0;
+                    }
+
+                    if (rhsOverPPrime[i] < rhsOverPPrime[exitingRow] && rhsOverPPrime[i] > 0)
+                    {
+                        exitingRow = i;
+                    }
+                    else if (rhsOverPPrime[i] == rhsOverPPrime[exitingRow] && (basics[i].column >= coefficientsLength - numArtificial - z))
+                    {
+                        // if they're equal, prioritize the one that is artifical
+                        exitingRow = i;
+                    }
+                }
+            }
+            return exitingRow;
+        }
+
+
+        public DenseMatrix ReformatMatrix(DenseMatrix[] pPrimes, DenseMatrix coefficients)
+        {
+            //do the things that change coefficients
+            for (int i = 0; i < pPrimes.Length; i++)
+            {
+                if (pPrimes[i] != null)
+                {
+                    coefficients.SetColumn(i, pPrimes[i].Column(0));
+                }
+            }
+
+            for (int i = 0; i < basics.Count; i++)
+            {
+                coefficients.SetColumn(basics[i].column, DenseVector.Create(coefficients.RowCount, delegate(int s)
+                {
+                    if (s == i)
+                        return 1;
+                    else
+                        return 0;
+                }));
+            }
+
+            rhsValues = (DenseVector)xPrime.SubMatrix(0, xPrime.RowCount - 1, 0, 1).Column(0);
+
+            return coefficients;
+        }
+
+        public DenseMatrix CreateMatrix(Model model)
         {
             int numConstraints = model.Constraints.Count;
             int numDecisionVars = model.Goal.Coefficients.Length;
@@ -461,9 +518,8 @@ namespace RaikesSimplexService.InsertTeamNameHere
             return coefficients;
         }
 
-        public void printMat(DenseMatrix mattress)
+        public void PrintMat(DenseMatrix mattress)
         {
-
             for (int i = 0; i < mattress.RowCount; i++)
             {
                 for (int j = 0; j < mattress.ColumnCount; j++)
