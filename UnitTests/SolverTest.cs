@@ -3,12 +3,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using RaikesSimplexService.DataModel;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 
 namespace UnitTests
 {
-    
-    
+
+
     /// <summary>
     ///This is a test class for SolverTest and is intended
     ///to contain all SolverTest Unit Tests
@@ -200,7 +201,7 @@ namespace UnitTests
         public void ExampleSolveTest()
         {
             #region Arrange
-            var target = new Solver();            
+            var target = new Solver();
 
             var lc1 = new LinearConstraint()
             {
@@ -230,13 +231,13 @@ namespace UnitTests
                 Value = 5
             };
 
-            var constraints = new List<LinearConstraint>() {lc1, lc2, lc3, lc4};
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3, lc4 };
 
-            var goal = new Goal() 
-            { 
+            var goal = new Goal()
+            {
                 Coefficients = new double[2] { 0.2, 0.3 },
                 ConstantTerm = 0
-            };           
+            };
 
             var model = new Model()
             {
@@ -244,7 +245,7 @@ namespace UnitTests
                 Goal = goal,
                 GoalKind = GoalKind.Minimize
             };
-            
+
             var expected = new Solution()
             {
                 Decisions = new double[2] { 3, 0 },
@@ -322,7 +323,7 @@ namespace UnitTests
         }
 
 
-   
+
         //two phase
         [TestMethod()]
         public void RevisedClassTest()
@@ -379,7 +380,7 @@ namespace UnitTests
 
             #endregion
             ////Act
-            
+
             ////Assert
             CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
             Assert.AreEqual(expected.Quality, actual.Quality);
@@ -1036,7 +1037,7 @@ namespace UnitTests
 
             var expected = new Solution()
             {
-              //  Decisions = new double[3] { 10, 10, 20 }, these could be other things
+                //  Decisions = new double[3] { 10, 10, 20 }, these could be other things
                 OptimalValue = 70,
                 AlternateSolutionsExist = true,
                 Quality = SolutionQuality.Optimal
@@ -1210,7 +1211,23 @@ namespace UnitTests
             //Assert
             Assert.AreEqual(expected.Quality, actual.Quality);
         }
-    
 
+        [TestMethod]
+        public void TestCheckForAlternates() {
+            var target = new Solver();
+
+            List<BasicVar> basicVars = new List<BasicVar>();
+            basicVars.Add(new BasicVar(0, 0));
+            basicVars.Add(new BasicVar(1, 1));
+            basicVars.Add(new BasicVar(4, 3));
+            // note that the 4th one is a zero! and that column is non basic
+            int[] objectiveArray = { 1, 2, 3, 2, 0};
+            DenseVector objectiveRow = DenseVector.Create(5, delegate(int s) { return objectiveArray[s]; });
+
+            var actual = target.checkForAlternates(basicVars, objectiveRow);
+            var expected = true;
+            Assert.AreEqual(actual, expected);
+        }
     }
 }
+

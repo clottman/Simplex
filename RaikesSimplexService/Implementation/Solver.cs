@@ -130,17 +130,27 @@ namespace RaikesSimplexService.InsertTeamNameHere
              *      ssa variables) should be basic variables
              *      Find what the final value is by finding their indices
              *      in basics and then the value at that index in xprimes
-             *      should be what you're looking for    I think
-             *      At least it's somewhere in xprimes
+             *      should be what you're looking forI think
+             *      At least it's somewhere in xprimes    
              */
             double[] solution = new double[model.Goal.Coefficients.Length];
             double op = model.Goal.ConstantTerm;
 
             for (int i = 0; i < solution.Length; i++)
             {
-                var row = (from aBasic in basics where aBasic.column == i select aBasic).SingleOrDefault();
-                solution[i] = xPrime[basics.IndexOf(row), 0];
+                var thisBasic = (from aBasic in basics where aBasic.column == i select aBasic).SingleOrDefault();
+                solution[i] = xPrime[basics.IndexOf(thisBasic), 0];
                 op += solution[i] * model.Goal.Coefficients[i];
+
+
+
+                //// !(from aBasic in basics select aBasic.column).Contains(i))
+                //for (int j = 0; j < objFunValues.Count; j++)
+                //{
+                  
+                //}
+
+
             }
 
             Solution sol = new Solution()
@@ -153,6 +163,23 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
 
             return sol;
+        }
+
+        public bool checkForAlternates(List<BasicVar> basicVars, DenseVector objectiveRow )
+        {
+            var zeros = Enumerable.Range(0, objectiveRow.Count)
+            .Where(k => objectiveRow[k] < 0.0001 && objectiveRow[k] > -0.0001)
+            .ToList();
+            
+            foreach (var index in zeros)
+            {
+                var inBasics = (from aBasic in basicVars select aBasic.column).Contains(index);
+                if (inBasics)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private DenseMatrix optimize(DenseMatrix coefficients, DenseVector objFunValues, bool artifical)
