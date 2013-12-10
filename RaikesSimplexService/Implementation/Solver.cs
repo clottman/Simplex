@@ -27,11 +27,12 @@ namespace RaikesSimplexService.InsertTeamNameHere
         public List<int> artificialRows { get; set; }
 
         public SolutionQuality solQual { get; set; }
+        public bool alternativeSolsExist { get; set; }
 
         public Solution Solve(Model model)
         {
             solQual = SolutionQuality.Optimal;
-
+            alternativeSolsExist = false;
             DenseVector testVect = DenseVector.Create(10, delegate(int s) { return s; });
 
             DenseMatrix coefficients = CreateMatrix(model);
@@ -176,7 +177,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             {
                 Decisions = solution,
                 OptimalValue = op,
-                AlternateSolutionsExist = false,
+                AlternateSolutionsExist = alternativeSolsExist,
                 Quality = solQual
             };
 
@@ -303,8 +304,13 @@ namespace RaikesSimplexService.InsertTeamNameHere
             {
                 coefficients = ReformatMatrix(pPrimes, coefficients);
             }
+            if (artifical == false)
+            {
+                alternativeSolsExist = CheckForAlternates(basics, cPrimes);
+            }
 
             return coefficients;
+
         }
 
 
@@ -596,6 +602,23 @@ namespace RaikesSimplexService.InsertTeamNameHere
             }
 
             return coefficients;
+        }
+
+        public bool CheckForAlternates(List<BasicVar> basicVars, DenseVector objectiveRow)
+        {
+            var zeros = Enumerable.Range(0, objectiveRow.Count)
+            .Where(k => objectiveRow[k] < 0.00001 && objectiveRow[k] > -0.00001)
+            .ToList();
+
+            foreach (var index in zeros)
+            {
+                var inBasics = (from aBasic in basicVars select aBasic.column).Contains(index);
+                if (inBasics == false)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void PrintMat(DenseMatrix mattress)
