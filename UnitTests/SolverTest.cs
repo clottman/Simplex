@@ -972,8 +972,8 @@ namespace UnitTests
 
             var expected = new Solution()
             {
-                Decisions = new double[2] { .66, .33 },
-                OptimalValue = -5,
+                Decisions = new double[2] { .67, .33 },
+                OptimalValue = 5.01,
                 AlternateSolutionsExist = false,
                 Quality = SolutionQuality.Optimal
             };
@@ -984,7 +984,7 @@ namespace UnitTests
             var actual = target.Solve(model);
 
             //Assert
-            Assert.AreEqual(expected.Decisions, actual.Decisions);
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
             Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
             Assert.AreEqual(expected.Quality, actual.Quality);
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
@@ -1048,7 +1048,6 @@ namespace UnitTests
             var actual = target.Solve(model);
 
             //Assert
-            Assert.AreEqual(expected.Decisions, actual.Decisions);
             Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
             Assert.AreEqual(expected.Quality, actual.Quality);
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
@@ -1158,7 +1157,7 @@ namespace UnitTests
             var actual = target.Solve(model);
 
             //Assert
-            Assert.AreEqual(expected.Decisions, actual.Decisions);
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
             Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
             Assert.AreEqual(expected.Quality, actual.Quality);
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
