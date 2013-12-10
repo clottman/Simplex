@@ -1440,6 +1440,51 @@ namespace UnitTests
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
         }
 
+        [TestMethod()]
+        public void OnePhaseAlternateSols()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 1
+            };
+
+
+
+            var constraints = new List<LinearConstraint>() { lc1 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                AlternateSolutionsExist = true,
+                OptimalValue = 1
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+            Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
+        }
+
 
 
     }
