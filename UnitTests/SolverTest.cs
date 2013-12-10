@@ -1445,6 +1445,141 @@ namespace UnitTests
         }
 
 
+        // from michael. Alternate solutions
+        /// <summary>
+        /// #2 from http://www.ms.uky.edu/~rwalker/Class%20Work%20Solutions/class%20work%208%20solutions.pdf
+        ///</summary>
+        [TestMethod()]
+        public void MsUKY2()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 2 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 6
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 3, 2 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 12
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { -2, 1 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Minimize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 4, 0 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                OptimalValue = -8
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
+
+
+        // from michael. changes "minimize" to maximize
+        /// <summary>
+        ///First Example from LPSimplexMethod.pptx.pdf
+        ///Tests ability of solver to solve a "Minimize Goal" problem
+        ///Solver must convert the Minimize goal to a Maximize goal, then can proceed normally
+        ///</summary>
+        [TestMethod()]
+        public void Maximize()
+        {
+            #region Arrange
+            var target = new Solver();
+
+            var lc1 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 50, 24 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 2400
+            };
+
+            var lc2 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 30, 33 },
+                Relationship = Relationship.LessThanOrEquals,
+                Value = 2100
+            };
+
+            var lc3 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 1, 0 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 20
+            };
+
+            var lc4 = new LinearConstraint()
+            {
+                Coefficients = new double[2] { 0, 1 },
+                Relationship = Relationship.GreaterThanOrEquals,
+                Value = 5
+            };
+
+            var constraints = new List<LinearConstraint>() { lc1, lc2, lc3, lc4 };
+
+            var goal = new Goal()
+            {
+                Coefficients = new double[2] { 1, 1 },
+                ConstantTerm = 0
+            };
+
+            var model = new Model()
+            {
+                Constraints = constraints,
+                Goal = goal,
+                GoalKind = GoalKind.Maximize
+            };
+
+            var expected = new Solution()
+            {
+                Decisions = new double[2] { 960.0 / 31.0, 1100.0 / 31.0 },
+                Quality = SolutionQuality.Optimal,
+                AlternateSolutionsExist = false,
+                //OptimalValue = 2160.0 / 31.0
+                OptimalValue = 66.451612903225808
+            };
+            #endregion
+
+            //Act
+            var actual = target.Solve(model);
+
+            //Assert
+            //CollectionAssert.AreEqual(expected.Decisions, actual.Decisions);
+            Assert.IsTrue(ApproxEqualArray(expected.Decisions, actual.Decisions));
+            //Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
+            Assert.IsTrue(ApproxEqual(expected.OptimalValue, actual.OptimalValue));
+            Assert.AreEqual(expected.Quality, actual.Quality);
+            Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);
+        }
 
     }
 
