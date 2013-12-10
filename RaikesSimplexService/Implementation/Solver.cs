@@ -23,6 +23,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
         public DenseMatrix xPrime { get; set; }
 
         public int numArtificial { get; set; }
+        public int numDecisionVars { get; set; }
 
         public List<int> artificialRows { get; set; }
 
@@ -512,7 +513,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
         public DenseMatrix CreateMatrix(Model model)
         {
             int numConstraints = model.Constraints.Count;
-            int numDecisionVars = model.Goal.Coefficients.Length;
+            numDecisionVars = model.Goal.Coefficients.Length;
             int varCounter = numDecisionVars;
             //  matrix(rows, columns)
             DenseMatrix coefficients = new DenseMatrix(numConstraints, numDecisionVars);
@@ -612,10 +613,12 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
             foreach (var index in zeros)
             {
-                var inBasics = (from aBasic in basicVars select aBasic.column).Contains(index);
+                var inBasics = (from aBasic in basicVars select aBasic.column ).Contains(index);
                 if (inBasics == false)
                 {
+                    if (index < numDecisionVars) { 
                     return true;
+                    }
                 }
             }
             return false;
