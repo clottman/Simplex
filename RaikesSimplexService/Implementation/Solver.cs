@@ -143,6 +143,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 if (basics.Contains(row))
                 {
                     solution[i] = xPrime[basics.IndexOf(row), 0];
+                    solution[i] = Math.Round(solution[i], 2);
                 }
                 else
                 {
@@ -154,8 +155,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 op += solution[i] * model.Goal.Coefficients[i];
             }
 
-
-
+            op = Math.Round(op, 2);
 
             Solution sol = new Solution()
             {
