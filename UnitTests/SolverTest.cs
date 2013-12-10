@@ -1036,7 +1036,7 @@ namespace UnitTests
 
             var expected = new Solution()
             {
-                Decisions = new double[3] { 10, 10, 20 },
+              //  Decisions = new double[3] { 10, 10, 20 }, these could be other things
                 OptimalValue = 70,
                 AlternateSolutionsExist = true,
                 Quality = SolutionQuality.Optimal
@@ -1048,7 +1048,6 @@ namespace UnitTests
             var actual = target.Solve(model);
 
             //Assert
-            Assert.AreEqual(expected.Decisions, actual.Decisions);
             Assert.AreEqual(expected.OptimalValue, actual.OptimalValue);
             Assert.AreEqual(expected.Quality, actual.Quality);
             Assert.AreEqual(expected.AlternateSolutionsExist, actual.AlternateSolutionsExist);

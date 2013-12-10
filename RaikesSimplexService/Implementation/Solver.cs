@@ -204,6 +204,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 rhsOverPPrime = new double[numConstraints];
             }
 
+            #region optimalLoop
             while (!optimal)
             {   
                 //calculates the inverse of b for this iteration
@@ -322,8 +323,10 @@ namespace RaikesSimplexService.InsertTeamNameHere
                     b.SetColumn(basics.IndexOf(toFix), coefficients.Column(newEntering));
                 }
             }
+            #endregion
 
-            if(artifical)
+            #region artificial
+            if (artifical)
             {
                 //do the things that change coefficients
                 for(int i = 0; i < pPrimes.Length; i++)
@@ -347,7 +350,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
                 rhsValues = (DenseVector)xPrime.SubMatrix(0, xPrime.RowCount - 1, 0, 1).Column(0);
             }
-
+            #endregion
             return coefficients;
         }
 
