@@ -1221,10 +1221,10 @@ namespace UnitTests
             basicVars.Add(new BasicVar(1, 1));
             basicVars.Add(new BasicVar(4, 3));
             // note that the 4th one is a zero! and that column is non basic
-            int[] objectiveArray = { 1, 2, 3, 2, 0};
-            DenseVector objectiveRow = DenseVector.Create(5, delegate(int s) { return objectiveArray[s]; });
+            int[] cpArray = { 1, 2, 3, 2, 0};
+            DenseVector cPrimes = DenseVector.Create(5, delegate(int s) { return cpArray[s]; });
 
-            var actual = target.checkForAlternates(basicVars, objectiveRow);
+            var actual = target.checkForAlternates(basicVars, cPrimes);
             var expected = true;
             Assert.AreEqual(actual, expected);
         }

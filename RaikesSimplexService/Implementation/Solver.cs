@@ -17,7 +17,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
         public DenseVector rhsValues { get; set; }
 
         public List<BasicVar> basics { get; set; }
-
+        public DenseMatrix coefficients { get; set; }
         public int numConstraints { get; set; }
 
         public DenseMatrix xPrime { get; set; }
@@ -30,7 +30,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
         {
             DenseVector testVect = DenseVector.Create(10, delegate(int s) { return s; });
 
-            DenseMatrix coefficients = createMatrix(model);
+            coefficients = createMatrix(model);
 
             //gets the coefficients from the goal
             DenseVector objFunCoeffs = new DenseVector(model.Goal.Coefficients);
@@ -106,7 +106,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 printMat(coefficients);
 
                 //solves it for that
-                coefficients = optimize(coefficients, objFunValues, true);
+                optimize(coefficients, objFunValues, true);
 
                 printMat(coefficients);
 
@@ -122,7 +122,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
             }
 
             printMat(coefficients);
-            optimize(coefficients, objFunValues, false);
+            var cPrimes = optimize(coefficients, objFunValues, false);
 
             /*
              * To find the solution:
@@ -141,23 +141,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 var thisBasic = (from aBasic in basics where aBasic.column == i select aBasic).SingleOrDefault();
                 solution[i] = xPrime[basics.IndexOf(thisBasic), 0];
                 op += solution[i] * model.Goal.Coefficients[i];
-
-
-
-                //// !(from aBasic in basics select aBasic.column).Contains(i))
-                //for (int j = 0; j < objFunValues.Count; j++)
-                //{
-                  
-                //}
-
-
             }
+
+            var alternateSolsExist = checkForAlternates(basics, objFunValues);
 
             Solution sol = new Solution()
             {
                 Decisions = solution,
                 OptimalValue = op,
-                AlternateSolutionsExist = false,
+                AlternateSolutionsExist = alternateSolsExist,
                 Quality = SolutionQuality.Optimal
             };
 
@@ -174,15 +166,15 @@ namespace RaikesSimplexService.InsertTeamNameHere
             foreach (var index in zeros)
             {
                 var inBasics = (from aBasic in basicVars select aBasic.column).Contains(index);
-                if (inBasics)
+                if (inBasics == false)
                 {
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
 
-        private DenseMatrix optimize(DenseMatrix coefficients, DenseVector objFunValues, bool artifical)
+        private double[] optimize(DenseMatrix coefficients, DenseVector objFunValues, bool artifical)
         {
             //for calculations on the optimal solution row
             int cCounter,
@@ -378,7 +370,7 @@ namespace RaikesSimplexService.InsertTeamNameHere
                 rhsValues = (DenseVector)xPrime.SubMatrix(0, xPrime.RowCount - 1, 0, 1).Column(0);
             }
             #endregion
-            return coefficients;
+            return cPrimes;
         }
 
         public DenseMatrix createMatrix(Model model)
