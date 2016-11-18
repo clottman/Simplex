@@ -188,13 +188,12 @@ namespace RaikesSimplexService.InsertTeamNameHere
 
         public DenseMatrix InitializeB(DenseMatrix coefficients)
         {
+            //starts with a garbage first column
             DenseMatrix b = new DenseMatrix(basics.Count, 1);
 
             //basics : info about where the basic variables are
             // b : columns that are for basic variables
 
-            //basics will have values greater than coefficients.ColumnCount - 1 if there are still artificial variables
-            //or if Nathan is bad and didn't get rid of them correctly
             foreach (BasicVar aBasic in basics)
             {
                 b = (DenseMatrix)b.Append(DenseVector.OfVector(coefficients.Column(aBasic.column)).ToColumnMatrix());
@@ -359,7 +358,6 @@ namespace RaikesSimplexService.InsertTeamNameHere
         {
             int iter;
             double[] rhsOverPPrime;
-
 
             if (artificial)
             {
